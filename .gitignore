@@ -1,0 +1,45 @@
+# Python cache and tooling
+__pycache__/
+*.py[cod]
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter temporary files
+.ipynb_checkpoints/
+
+# Local environment and editor files
+.env
+.env.*
+!.env.example
+.vscode/
+
+# Build and distribution artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs and local outputs
+*.log
+*.tmp
+*.temp
+
+# Common large dataset/model artifacts
+*.h5
+*.hdf5
+*.keras
+*.ckpt
+*.pth
+*.pt
+*.onnx
+*.zip
+*.tar
+*.tar.gz
