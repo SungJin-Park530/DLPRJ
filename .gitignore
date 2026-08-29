@@ -28,11 +28,13 @@ dist/
 *.egg-info/
 
 # Logs and local outputs
+/runs/
 *.log
 *.tmp
 *.temp
 
 # Common large dataset/model artifacts
+/Sign-1/
 *.h5
 *.hdf5
 *.keras
