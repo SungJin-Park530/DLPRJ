@@ -35,6 +35,7 @@ dist/
 
 # Common large dataset/model artifacts
 /Sign-1/
+/weights/
 *.h5
 *.hdf5
 *.keras
