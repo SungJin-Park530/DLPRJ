@@ -1,5 +1,6 @@
 ipykernel
 jupyter
+streamlit
 numpy
 pandas
 matplotlib
