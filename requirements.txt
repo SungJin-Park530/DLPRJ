@@ -1,6 +1,7 @@
 ipykernel
 jupyter
 streamlit
+gdown
 numpy
 pandas
 matplotlib
