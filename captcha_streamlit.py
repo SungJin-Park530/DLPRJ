@@ -1,3 +1,4 @@
+import base64
 from io import BytesIO
 from pathlib import Path
 from random import choice
@@ -5,11 +6,20 @@ from time import perf_counter
 from typing import Any
 
 import gdown
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import streamlit as st
 from PIL import Image
 
 MODEL_DIRECTORY = Path(__file__).parent / "weights"
 SAMPLE_DIRECTORY = Path(__file__).parent / "samples"
+CONTENT_MAX_WIDTH_PX = 1000
+IMAGE_PANEL_HEIGHT_PX = 460
+MODEL_EVALUATION_METRICS = {
+	"medium": {"Precision": 0.9474, "Recall": 0.9122, "mAP50": 0.9750},
+	"nano": {"Precision": 0.9252, "Recall": 0.8714, "mAP50": 0.9430},
+}
 
 @st.cache_data
 def get_model_configs() -> dict[str, dict[str, str]]:
@@ -138,14 +148,60 @@ def get_selected_image() -> Image.Image | None:
 	return Image.open(image_source).convert("RGB")
 
 
+def render_analysis_image(image: Image.Image | Any) -> None:
+	"""Render an image centered and contained within the analysis panel."""
+	if not isinstance(image, Image.Image):
+		image = Image.fromarray(image)
+	image_buffer = BytesIO()
+	image.convert("RGB").save(image_buffer, format="PNG")
+	encoded_image = base64.b64encode(image_buffer.getvalue()).decode("ascii")
+	st.markdown(
+		f"""
+		<div class="analysis-image-frame">
+			<img src="data:image/png;base64,{encoded_image}" alt="분석 이미지">
+		</div>
+		""",
+		unsafe_allow_html=True,
+	)
+
+
+def render_model_metric_comparison() -> None:
+	"""Render the vertical grouped bar chart from the model evaluation."""
+	metric_names = list(next(iter(MODEL_EVALUATION_METRICS.values())).keys())
+	model_names = list(MODEL_EVALUATION_METRICS.keys())
+	x_positions = np.arange(len(metric_names))
+	bar_width = 0.35
+	figure, axis = plt.subplots(figsize=(10, 5))
+
+	for index, model_name in enumerate(model_names):
+		metric_values = [MODEL_EVALUATION_METRICS[model_name][metric_name] for metric_name in metric_names]
+		offset = (index - 0.5) * bar_width
+		bars = axis.bar(x_positions + offset, metric_values, bar_width, label=model_name.title())
+		axis.bar_label(bars, fmt="%.3f", padding=3)
+
+	axis.set_xlabel("Metric")
+	axis.set_ylabel("Score")
+	axis.set_xticks(x_positions, metric_names)
+	axis.set_ylim(0.7, 1.0)
+	axis.grid(axis="y", linestyle="--", alpha=0.5)
+	axis.legend()
+	figure.tight_layout()
+	st.pyplot(figure)
+	plt.close(figure)
+
+
 def run_prediction(model_paths: dict[str, str]) -> None:
 	"""Run inference with the selected cached YOLO model."""
+	model_name = st.session_state["model_selector"]
+	if model_name == "모델 선택...":
+		st.session_state["prediction_error"] = "예측에 사용할 모델을 선택하세요."
+		return
+
 	selected_image = get_selected_image()
 	if selected_image is None:
 		st.session_state["prediction_error"] = "먼저 분석할 이미지를 선택하세요."
 		return
 
-	model_name = st.session_state["model_selector"]
 	model = load_model(model_paths[model_name])
 	start_time = perf_counter()
 	result = model(selected_image, verbose=False)[0]
@@ -169,7 +225,31 @@ def main() -> None:
 		page_title="주행 환경 이미지 분석 서비스",
 		page_icon="",
 		layout="wide",
-		initial_sidebar_state="expanded",
+		initial_sidebar_state="collapsed",
+	)
+	st.markdown(
+		f"""
+		<style>
+			.stMainBlockContainer {{
+				max-width: {CONTENT_MAX_WIDTH_PX}px;
+			}}
+			.analysis-image-frame {{
+				display: flex;
+				height: calc({IMAGE_PANEL_HEIGHT_PX}px - 2rem);
+				align-items: center;
+				justify-content: center;
+				overflow: hidden;
+			}}
+			.analysis-image-frame img {{
+				max-width: 100%;
+				max-height: 100%;
+				width: auto !important;
+				height: auto !important;
+				object-fit: contain;
+			}}
+		</style>
+		""",
+		unsafe_allow_html=True,
 	)
 	missing_models = get_missing_model_names()
 	if missing_models:
@@ -181,76 +261,76 @@ def main() -> None:
 	else:
 		model_paths = prepare_model_files()
 
-	with st.sidebar:
-		st.title("Menu")
-		st.divider()
-		st.caption("Navigation will be added here.")
-
 	st.title("주행 환경 이미지 분석 서비스")
 	st.divider()
 
 	main_tab, results_tab = st.tabs(["이미지 분석", "학습 결과 및 비교"])
 	with main_tab:
-		st.subheader("표지판 객체 탐지")
 		image_column, prediction_column = st.columns([3, 2], gap="large")
 
 		with image_column:
-			with st.container(height=460, border=True):
+			with st.container(height=IMAGE_PANEL_HEIGHT_PX, border=True, key="analysis-image"):
 				if "prediction_image" in st.session_state:
-					st.image(st.session_state["prediction_image"], use_container_width=True)
+					render_analysis_image(st.session_state["prediction_image"])
 				elif selected_image := get_selected_image():
-					st.image(selected_image, use_container_width=True)
+					render_analysis_image(selected_image)
 				else:
 					st.subheader("분석 이미지")
 					st.caption("이미지를 선택하면 이 영역에 표시됩니다.")
 
 		with prediction_column:
-			with st.container(height=460, border=True):
-				st.subheader("예측 결과")
-				if st.session_state.get("no_detections"):
+			with st.container(height=460, border=False):
+				st.file_uploader(
+					"이미지 업로드",
+					type=["jpg", "jpeg", "png", "webp"],
+					label_visibility="collapsed",
+					key="image_uploader",
+					on_change=select_uploaded_image,
+				)
+				st.selectbox(
+					"모델 선택",
+					options=["모델 선택...", "nano", "medium"],
+					format_func=lambda model_name: model_name.title() if model_name != "모델 선택..." else model_name,
+					label_visibility="collapsed",
+					key="model_selector",
+				)
+				button_column, random_column = st.columns(2, gap="small")
+				with button_column:
+					st.button("예측하기", on_click=run_prediction, args=(model_paths,), use_container_width=True)
+				with random_column:
+					st.button("랜덤 이미지", on_click=select_random_image, use_container_width=True)
+
+				if inference_time_ms := st.session_state.get("inference_time_ms"):
+					st.caption(f"예측 시간: {inference_time_ms:.2f} ms")
+
+				if image_error := st.session_state.get("image_error"):
+					st.error(image_error)
+				if prediction_error := st.session_state.get("prediction_error"):
+					st.error(prediction_error)
+				elif st.session_state.get("no_detections"):
 					st.error("예측된 표지판 객체가 없습니다.")
 				elif "prediction_rows" in st.session_state:
 					for prediction_row in st.session_state["prediction_rows"]:
 						st.success(prediction_row)
 				else:
-					st.caption("예측 결과가 이 영역에 표시됩니다.")
-
-		random_column, upload_column, model_column, predict_column = st.columns([1, 2, 1, 1], gap="small")
-		with random_column:
-			st.button("랜덤 이미지 호출", on_click=select_random_image)
-
-		with upload_column:
-			st.file_uploader(
-				"이미지 업로드",
-				type=["jpg", "jpeg", "png", "webp"],
-				label_visibility="collapsed",
-				key="image_uploader",
-				on_change=select_uploaded_image,
-			)
-
-		with model_column:
-			st.selectbox(
-				"모델 선택",
-				options=["nano", "medium"],
-				format_func=lambda model_name: model_name.title(),
-				label_visibility="collapsed",
-				key="model_selector",
-			)
-
-		with predict_column:
-			st.button("예측하기", on_click=run_prediction, args=(model_paths,))
-
-		if inference_time_ms := st.session_state.get("inference_time_ms"):
-			st.caption(f"예측 시간: {inference_time_ms:.2f} ms")
-
-		if image_error := st.session_state.get("image_error"):
-			st.error(image_error)
-		elif prediction_error := st.session_state.get("prediction_error"):
-			st.warning(prediction_error)
+					st.info("예측 결과가 이 영역에 표시됩니다.")
 
 	with results_tab:
-		st.subheader("학습 결과 및 비교")
-		st.info("모델 학습 결과와 비교 시각자료가 이 영역에 표시됩니다.")
+		render_model_metric_comparison()
+
+		metrics_dataframe = pd.DataFrame(MODEL_EVALUATION_METRICS).T
+		metrics_dataframe.index = metrics_dataframe.index.str.title()
+		st.bar_chart(metrics_dataframe, horizontal=True)
+
+		metric_table = pd.DataFrame(
+			{
+				"비교 항목": ["모델 파일 크기", "학습 시간", "예측 시간"],
+				"Nano": ["6,088 KB", "약 5~6분", "약 30ms"],
+				"Medium": ["50,840 KB", "약 10~12분", "약 70ms"],
+			}
+		)
+		with st.container(horizontal_alignment="center"):
+			st.dataframe(metric_table, hide_index=True, width=360)
 
 
 if __name__ == "__main__":
