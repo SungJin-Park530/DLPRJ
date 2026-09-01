@@ -1,0 +1,16 @@
+ipykernel
+jupyter
+streamlit
+gdown
+numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+tensorflow
+keras
+opencv-python
+Pillow
+ultralytics
+roboflow
+python-dotenv
