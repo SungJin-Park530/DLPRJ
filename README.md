@@ -83,6 +83,7 @@ flowchart LR
 .
 ├── captcha_streamlit.py            # Streamlit 웹 애플리케이션
 ├── 박성진_딥러닝프로젝트.ipynb       # 데이터 분석 및 YOLO 모델 학습 노트북
+├── .env.example                    # Roboflow 데이터셋 접근 환경 변수 예시
 ├── requirements.txt                # 애플리케이션 실행 의존성
 ├── requirements(local).txt         # 로컬 학습/분석 환경 의존성
 ├── dataset/                        # 데이터셋 보관 폴더
@@ -143,7 +144,25 @@ pip install -r requirements.txt
 pip install -r "requirements(local).txt"
 ```
 
-### 5. 애플리케이션 실행
+### 5. Roboflow 환경 변수 설정 (모델 학습 시)
+
+데이터셋을 Roboflow에서 내려받아 노트북으로 학습하려면 프로젝트 루트에 `.env` 파일을 만들고, `.env.example`의 값을 본인 Roboflow 프로젝트 정보로 변경합니다.
+
+```powershell
+Copy-Item .env.example .env
+```
+
+`.env` 파일:
+
+```dotenv
+ROBOFLOW_API_KEY=your_roboflow_api_key
+ROBOFLOW_WORKSPACE=your_workspace_name
+ROBOFLOW_PROJECT=your_project_name
+```
+
+`ROBOFLOW_WORKSPACE`와 `ROBOFLOW_PROJECT`에는 Roboflow URL에 표시되는 워크스페이스 및 프로젝트 슬러그를 입력합니다. `.env`는 `.gitignore`에 포함되어 있어 API 키가 Git에 커밋되지 않습니다.
+
+### 6. 애플리케이션 실행
 
 ```powershell
 streamlit run captcha_streamlit.py
