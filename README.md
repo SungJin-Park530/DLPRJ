@@ -19,7 +19,34 @@ YOLOv8 기반 객체 탐지 모델을 사용해 주행 환경 이미지에서 �
 | --- | --- |
 | 이미지를 업로드하거나 랜덤 예제 이미지를 선택한 뒤 모델을 골라 객체 탐지를 실행합니다. | Nano와 Medium 모델의 Precision, Recall, mAP50 및 파일 크기, 학습/추론 시간을 비교합니다. |
 
+<!-- 아래 이미지 파일을 docs/images/에 추가한 후 주석을 해제하세요. -->
+
+<!--
+| 이미지 분석 화면 | 학습 결과 및 비교 화면 |
+| --- | --- |
+| ![이미지 분석 화면](docs/images/image-analysis-screen.png) | ![학습 결과 및 비교 화면](docs/images/model-comparison-screen.png) |
+-->
+
+## 시연 영상
+
+서비스 실행부터 이미지 업로드, 모델 선택, 객체 탐지 결과 확인까지의 흐름을 담은 시연 영상을 추가할 자리입니다.
+
+<!-- 동영상 파일을 docs/videos/에 추가하거나 YouTube 링크로 교체한 후 주석을 해제하세요. -->
+
+<!--
+[![주행 환경 이미지 분석 시연 영상](docs/images/demo-video-thumbnail.png)](https://www.youtube.com/watch?v=VIDEO_ID)
+-->
+
 ## 기술 스택
+
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![Ultralytics](https://img.shields.io/badge/Ultralytics-YOLOv8-111F68?logo=ultralytics&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)
+![Pandas](https://img.shields.io/badge/pandas-150458?logo=pandas&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy-013243?logo=numpy&logoColor=white)
+![Matplotlib](https://img.shields.io/badge/Matplotlib-11557C?logo=matplotlib&logoColor=white)
+![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?logo=opencv&logoColor=white)
+![Jupyter](https://img.shields.io/badge/Jupyter-F37626?logo=jupyter&logoColor=white)
 
 | 구분 | 기술 |
 | --- | --- |
@@ -60,6 +87,9 @@ flowchart LR
 ├── requirements(local).txt         # 로컬 학습/분석 환경 의존성
 ├── dataset/                        # 데이터셋 보관 폴더
 ├── samples/                        # 서비스에서 사용하는 예제 이미지
+├── docs/
+│   ├── images/                     # README 서비스 화면 및 영상 썸네일
+│   └── videos/                     # README 시연 영상 파일
 └── weights/                        # 첫 실행 시 자동 다운로드되는 모델 가중치
     ├── v8n_best.pt
     └── v8m_best.pt
