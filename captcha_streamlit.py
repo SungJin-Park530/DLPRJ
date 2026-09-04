@@ -4,6 +4,7 @@ from pathlib import Path
 from random import choice
 from time import perf_counter
 from typing import Any
+from llm_handler import generate_safety_guide
 
 import gdown
 import matplotlib.pyplot as plt
@@ -110,6 +111,8 @@ def clear_prediction() -> None:
 	st.session_state.pop("prediction_rows", None)
 	st.session_state.pop("no_detections", None)
 	st.session_state.pop("inference_time_ms", None)
+	st.session_state.pop("safety_guide", None)
+	st.session_state.pop("detected_objects", None)
 
 
 def select_random_image() -> None:
@@ -216,6 +219,18 @@ def run_prediction(model_paths: dict[str, str]) -> None:
 		key=lambda row: float(row.rsplit("(", 1)[1][:-2]),
 		reverse=True,
 	)
+
+	# 1~3. 탐지된 클래스 이름 및 개수 집계
+	detected_objects: dict[str, int] = {}
+	for class_id in result.boxes.cls.tolist():
+		class_name = result.names[int(class_id)]
+		detected_objects[class_name] = detected_objects.get(class_name, 0) + 1
+	st.session_state["detected_objects"] = detected_objects
+
+	# 4~6. LLM 안전 가이드 생성
+	with st.spinner("AI 안전 가이드를 생성하는 중..."):
+		st.session_state["safety_guide"] = generate_safety_guide(detected_objects)
+
 	st.session_state.pop("prediction_error", None)
 
 
@@ -314,6 +329,9 @@ def main() -> None:
 						st.success(prediction_row)
 				else:
 					st.info("예측 결과가 이 영역에 표시됩니다.")
+
+		if safety_guide := st.session_state.get("safety_guide"):
+			st.info(safety_guide)
 
 	with results_tab:
 		render_model_metric_comparison()
