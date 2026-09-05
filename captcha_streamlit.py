@@ -6,6 +6,8 @@ from time import perf_counter
 from typing import Any
 from llm_handler import generate_safety_guide
 from audio_handler import text_to_speech_bytes
+from streamlit_mic_recorder import mic_recorder
+from audio_handler import speech_to_text_from_bytes
 
 import gdown
 import matplotlib.pyplot as plt
@@ -338,6 +340,29 @@ def main() -> None:
 			audio_bytes = text_to_speech_bytes(safety_guide)
 			if audio_bytes:
 				st.audio(audio_bytes, format="audio/mp3", autoplay=True)
+		
+		# 음성 입력 추가
+		st.markdown("---")
+		st.subheader("🎤 음성 명령 / 질문 입력")
+
+		# 브라우저 마이크 녹음 버튼 생성
+		audio = mic_recorder(
+			start_prompt="🎤 녹음 시작",
+			stop_prompt="⏹️ 녹음 중지",
+			format="wav",
+			key="mic_recorder"
+		)
+
+		# 마이크 녹음 데이터가 들어오면 STT 실행
+		if audio:
+			# 녹음된 WAV 바이너리 데이터 추출
+			audio_bytes = audio['bytes']
+			
+			with st.spinner("음성을 텍스트로 변환하는 중..."):
+				stt_result = speech_to_text_from_bytes(audio_bytes)
+			
+			# 변환된 텍스트 화면 출력
+			st.success(f" 인식된 질문: **{stt_result}**")
 
 	with results_tab:
 		render_model_metric_comparison()
