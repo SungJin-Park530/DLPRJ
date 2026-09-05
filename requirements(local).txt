@@ -16,3 +16,4 @@ roboflow
 python-dotenv
 gTTS
 streamlit-mic-recorder
+SpeechRecognition
