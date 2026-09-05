@@ -5,6 +5,7 @@ from random import choice
 from time import perf_counter
 from typing import Any
 from llm_handler import generate_safety_guide
+from audio_handler import text_to_speech_bytes
 
 import gdown
 import matplotlib.pyplot as plt
@@ -332,6 +333,11 @@ def main() -> None:
 
 		if safety_guide := st.session_state.get("safety_guide"):
 			st.info(safety_guide)
+
+			# 음성 출력 추가
+			audio_bytes = text_to_speech_bytes(safety_guide)
+			if audio_bytes:
+				st.audio(audio_bytes, format="audio/mp3", autoplay=True)
 
 	with results_tab:
 		render_model_metric_comparison()
