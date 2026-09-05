@@ -47,7 +47,7 @@ def generate_safety_guide(
     detection_summary = ", ".join([f"{obj} {count}개" for obj, count in detected_objects.items()])
 
     # 2. 프롬프트 데이터 바인딩
-    prompt_template = load_prompt_template()
+    prompt_template = load_prompt_template(prompt_file_path)
     prompt = prompt_template.format(detection_summary=detection_summary)
 
     # 3. Google Gemini API 호출
