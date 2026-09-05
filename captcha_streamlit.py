@@ -390,14 +390,43 @@ def main() -> None:
 
 		# 마이크 녹음 데이터가 들어오면 STT 실행
 		if audio:
-			# 녹음된 WAV 바이너리 데이터 추출
 			audio_bytes = audio['bytes']
 			
 			with st.spinner("음성을 텍스트로 변환하는 중..."):
-				stt_result = speech_to_text_from_bytes(audio_bytes)
+				user_question = speech_to_text_from_bytes(audio_bytes)
 			
-			# 변환된 텍스트 화면 출력
-			st.success(f" 인식된 질문: **{stt_result}**")
+			# STT 텍스트 변환 결과는 화면에 항상 출력
+			st.success(f"🗣️ 인식된 질문: **{user_question}**")
+
+			# 예측 함수가 저장한 탐지 결과와 사이드바 프롬프트 설정을 사용
+			detected_dict = st.session_state.get("detected_objects")
+			prompt_path_map = {
+				"기본 안전 가이드 (safety_guide_prompt.md)": "prompts/safety_guide_prompt.md",
+				"간결 모드 (short_prompt.md)": "prompts/short_prompt.md",
+			}
+			selected_prompt_path = prompt_path_map[st.session_state["prompt_option"]]
+
+			# 💡 조건부 분기 처리
+			if "detected_objects" in st.session_state:
+				# [CASE 1] 예측을 완료한 상태 -> 탐지 데이터 + STT 텍스트 함께 LLM 전송
+				with st.spinner("탐지된 도로 상황과 질문을 함께 분석하여 가이드를 생성 중..."):
+					llm_response = generate_safety_guide(
+						detected_objects=detected_dict,
+						temperature=st.session_state["temperature"],             # 사이드바 slider 값
+						prompt_file_path=selected_prompt_path,
+						user_question=user_question          # 👈 음성 질문 전달
+					)
+					
+					st.info(f"🤖 LLM 답변: {llm_response}")
+					
+					# (선택) LLM 답변을 gTTS 음성으로 출력
+					audio_fp = text_to_speech_bytes(llm_response)
+					if audio_fp:
+						st.audio(audio_fp, format="audio/mp3", autoplay=True)
+
+			else:
+				# [CASE 2] 예측을 하지 않은 상태 -> LLM 전송 시스팀적 차단
+				st.warning("⚠️ 아직 이미지 분석(예측)이 수행되지 않았습니다. 먼저 이미지를 업로드하고 예측을 실행한 후 질문해 주세요!")
 
 	with results_tab:
 		render_model_metric_comparison()

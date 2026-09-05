@@ -33,7 +33,8 @@ def get_gemini_api_key():
 def generate_safety_guide(
     detected_objects: dict,
     temperature: float = 0.7,
-    prompt_file_path: str = None
+    prompt_file_path: str = None,
+    user_question: str = None
 ) -> str:
     """YOLO 탐지 결과를 기반으로 Gemini LLM을 호출하여 운전자 안내 문구를 생성합니다."""
     
@@ -50,6 +51,10 @@ def generate_safety_guide(
     # 2. 프롬프트 데이터 바인딩
     prompt_template = load_prompt_template(prompt_file_path)
     prompt = prompt_template.format(detection_summary=detection_summary)
+    
+    # 음성 질문이 함께 넘어온 경우 프롬프트에 추가 결합
+    if user_question and user_question.strip():
+        prompt += f"\n\n[운전자 추가 음성 질문]: {user_question}\n위 탐지 정보와 운전자의 질문을 종합하여 3문장 이내로 답변하세요."
 
     # 3. Google Gemini API 호출
     try:
