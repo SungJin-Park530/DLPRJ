@@ -10,10 +10,11 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent
 PROMPT_PATH = BASE_DIR / "prompts" / "safety_guide_prompt.md"
 
-def load_prompt_template() -> str:
+def load_prompt_template(prompt_file_path: str = None) -> str:
     """.md 파일에서 프롬프트 템플릿을 읽어옵니다."""
     try:
-        with open(PROMPT_PATH, "r", encoding="utf-8") as f:
+        path_to_open = prompt_file_path if prompt_file_path else PROMPT_PATH
+        with open(path_to_open, "r", encoding="utf-8") as f:
             return f.read()
     except Exception:
         # 파일이 없을 경우를 대비한 폴백(Fallback) 기본 프롬프트
