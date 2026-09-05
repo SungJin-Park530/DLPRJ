@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 
 load_dotenv()
 
@@ -28,10 +29,14 @@ def get_gemini_api_key():
         pass
     return os.getenv("GEMINI_API_KEY")
 
-def generate_safety_guide(detected_objects: dict) -> str:
+def generate_safety_guide(
+    detected_objects: dict,
+    temperature: float = 0.7,
+    prompt_file_path: str = None
+) -> str:
     """YOLO 탐지 결과를 기반으로 Gemini LLM을 호출하여 운전자 안내 문구를 생성합니다."""
-    api_key = get_gemini_api_key()
     
+    api_key = get_gemini_api_key()
     if not api_key:
         return "⚠️ GEMINI_API_KEY가 설정되지 않았습니다. Secrets 또는 .env 파일을 확인해 주세요."
 
@@ -49,9 +54,15 @@ def generate_safety_guide(detected_objects: dict) -> str:
     try:
         client = genai.Client(api_key=api_key)
         
+        # 파라미터 설정
+        config = types.GenerateContentConfig(
+            temperature=temperature
+        )
+        
         response = client.models.generate_content(
             model='gemini-3.6-flash',
             contents=prompt,
+            config=config
         )
         return response.text.strip()
         

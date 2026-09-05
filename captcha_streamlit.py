@@ -196,6 +196,28 @@ def render_model_metric_comparison() -> None:
 	plt.close(figure)
 
 
+def render_sidebar() -> None:
+	"""Render LLM controls independently from the prediction action."""
+	st.sidebar.title("LLM 파라미터 조정")
+	st.sidebar.slider(
+		"Temperature",
+		min_value=0.0,
+		max_value=1.0,
+		value=0.7,
+		step=0.1,
+		key="temperature",
+	)
+	st.sidebar.selectbox(
+		"프롬프트 버전 선택",
+		[
+			"기본 안전 가이드 (safety_guide_prompt.md)",
+			"간결 모드 (short_prompt.md)",
+		],
+		index=0,
+		key="prompt_option",
+	)
+
+
 def run_prediction(model_paths: dict[str, str]) -> None:
 	"""Run inference with the selected cached YOLO model."""
 	model_name = st.session_state["model_selector"]
@@ -230,9 +252,21 @@ def run_prediction(model_paths: dict[str, str]) -> None:
 		detected_objects[class_name] = detected_objects.get(class_name, 0) + 1
 	st.session_state["detected_objects"] = detected_objects
 
+	prompt_option = st.session_state["prompt_option"]
+	
+	prompt_path_map = {
+		"기본 안전 가이드 (safety_guide_prompt.md)": "prompts/safety_guide_prompt.md",
+		"간결 모드 (short_prompt.md)": "prompts/short_prompt.md"
+	}
+	selected_prompt_path = prompt_path_map[prompt_option]
+
 	# 4~6. LLM 안전 가이드 생성
 	with st.spinner("AI 안전 가이드를 생성하는 중..."):
-		st.session_state["safety_guide"] = generate_safety_guide(detected_objects)
+		st.session_state["safety_guide"] = generate_safety_guide(
+			detected_objects,
+			temperature=st.session_state["temperature"],
+			prompt_file_path=selected_prompt_path
+		)
 
 	st.session_state.pop("prediction_error", None)
 
@@ -243,8 +277,9 @@ def main() -> None:
 		page_title="주행 환경 이미지 분석 서비스",
 		page_icon="",
 		layout="wide",
-		initial_sidebar_state="collapsed",
+		initial_sidebar_state="expanded",
 	)
+	render_sidebar()
 	st.markdown(
 		f"""
 		<style>
