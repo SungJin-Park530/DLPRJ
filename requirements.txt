@@ -4,8 +4,8 @@ matplotlib>=3.8,<4
 numpy>=1.26,<4
 pandas>=2.2,<4
 Pillow>=10.3,<13
-ultralytics>=8.3,<9
 opencv-python-headless>=4.10,<5
+ultralytics>=8.3,<9
 google-genai
 python-dotenv
 gTTS
