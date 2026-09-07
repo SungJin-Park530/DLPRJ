@@ -2,6 +2,40 @@
 
 YOLOv8 기반 객체 탐지와 Gemini LLM 기반 안전 안내를 결합한 Streamlit 웹 애플리케이션입니다. 주행 환경 이미지를 분석해 교통 표지판을 탐지하고, 탐지 결과와 운전자의 음성 질문을 바탕으로 상황별 안내 문구를 제공합니다.
 
+## 시연 영상
+
+서비스 실행부터 이미지 업로드, 모델 선택, 객체 탐지 결과 확인까지의 흐름을 담은 시연 영상을 추가할 자리입니다.
+
+<!-- 동영상 파일을 docs/videos/에 추가하거나 YouTube 링크로 교체한 후 주석을 해제하세요. -->
+
+<!--
+[![주행 환경 이미지 분석 시연 영상](docs/images/demo-video-thumbnail.png)](https://www.youtube.com/watch?v=VIDEO_ID)
+-->
+
+## 서비스 화면
+
+애플리케이션은 다음 두 탭으로 구성됩니다.
+
+| 표지판 객체 탐지 | 학습 결과 성능 비교 |
+| --- | --- |
+| ![표지판 객체 탐지](docs/images/image1.png) | ![학습 결과 성능 비교](docs/images/image2.png) |
+
+## 보고서
+
+| 모델 학습과 성능 개선 | VUI 연결과 프롬프트 엔지니어링 |
+| --- | --- |
+| ![딥러닝 모델 학습 보고서](docs/images/ppt1.png) | ![VUI 및 프롬프팅 보고서](docs/images/ppt2.png) |
+| [모델 학습 보고서](https://drive.google.com/file/d/1MSKBBslu3yHva1ifJ_1mnqzxKrfizkxc/view?usp=sharing) | [VUI 및 프롬프팅 보고서](https://drive.google.com/file/d/1TiLdma-SNRPBGLOobVZK2Bydbn_kfdQ_/view?usp=sharing) |
+
+## 모델 비교
+
+| 모델 | Precision | Recall | mAP50 | 모델 파일 크기 | 학습 시간 | 예측 시간 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Nano | 0.9252 | 0.8714 | 0.9430 | 6,088 KB | 약 5~6분 | 약 30ms |
+| Medium | 0.9474 | 0.9122 | 0.9750 | 50,840 KB | 약 10~12분 | 약 70ms |
+
+Medium 모델은 정확도 지표가 더 높고, Nano 모델은 파일 크기와 추론 시간이 더 작아 경량 환경에 적합합니다.
+
 ## 주요 기능
 
 - JPG, JPEG, PNG, WEBP 형식의 주행 환경 이미지 업로드
@@ -15,32 +49,6 @@ YOLOv8 기반 객체 탐지와 Gemini LLM 기반 안전 안내를 결합한 Stre
 - 생성된 안내 문구의 한국어 TTS(Text-to-Speech) 자동 재생
 - Precision, Recall, mAP50 기반 모델 성능 비교 시각화
 - 모델 파일이 없을 때 Google Drive에서 자동 다운로드
-
-## 서비스 화면
-
-애플리케이션은 다음 두 탭으로 구성됩니다.
-
-| 이미지 분석 | 학습 결과 및 비교 |
-| --- | --- |
-| 이미지를 업로드하거나 랜덤 예제 이미지를 선택한 뒤 모델을 골라 객체 탐지를 실행합니다. 탐지 결과를 바탕으로 AI 안전 안내를 받고, 마이크로 후속 질문을 할 수 있습니다. | Nano와 Medium 모델의 Precision, Recall, mAP50 및 파일 크기, 학습/추론 시간을 비교합니다. |
-
-<!-- 아래 이미지 파일을 docs/images/에 추가한 후 주석을 해제하세요. -->
-
-<!--
-| 이미지 분석 화면 | 학습 결과 및 비교 화면 |
-| --- | --- |
-| ![이미지 분석 화면](docs/images/image-analysis-screen.png) | ![학습 결과 및 비교 화면](docs/images/model-comparison-screen.png) |
--->
-
-## 시연 영상
-
-서비스 실행부터 이미지 업로드, 모델 선택, 객체 탐지 결과 확인까지의 흐름을 담은 시연 영상을 추가할 자리입니다.
-
-<!-- 동영상 파일을 docs/videos/에 추가하거나 YouTube 링크로 교체한 후 주석을 해제하세요. -->
-
-<!--
-[![주행 환경 이미지 분석 시연 영상](docs/images/demo-video-thumbnail.png)](https://www.youtube.com/watch?v=VIDEO_ID)
--->
 
 ## 기술 스택
 
@@ -213,15 +221,6 @@ streamlit run captcha_streamlit.py
 ```
 
 실행 후 브라우저에서 `http://localhost:8501`로 접속합니다. 최초 실행에서는 두 YOLO 모델 가중치가 `weights/` 폴더로 자동 다운로드되므로 인터넷 연결이 필요합니다. Gemini 안내, STT 및 TTS 기능도 외부 API를 사용하므로 인터넷 연결이 필요합니다.
-
-## 모델 비교
-
-| 모델 | Precision | Recall | mAP50 | 모델 파일 크기 | 학습 시간 | 예측 시간 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Nano | 0.9252 | 0.8714 | 0.9430 | 6,088 KB | 약 5~6분 | 약 30ms |
-| Medium | 0.9474 | 0.9122 | 0.9750 | 50,840 KB | 약 10~12분 | 약 70ms |
-
-Medium 모델은 정확도 지표가 더 높고, Nano 모델은 파일 크기와 추론 시간이 더 작아 경량 환경에 적합합니다.
 
 ## 참고
 
