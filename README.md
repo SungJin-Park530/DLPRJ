@@ -82,26 +82,46 @@ Medium 모델은 정확도 지표가 더 높고, Nano 모델은 파일 크기와
 ## 시스템 아키텍처
 
 ```mermaid
-flowchart TD
-    A[사용자] --> B[Streamlit 웹 UI]
-    B --> C[이미지 업로드 또는 랜덤 예제 선택]
-    C --> D{YOLOv8 모델 선택}
-    D --> E[Nano 또는 Medium 가중치 로드]
-    E --> F[객체 탐지 수행]
-    F --> G[탐지 이미지, 객체명, 신뢰도, 추론 시간 표시]
-    F --> H[탐지 객체별 개수 집계]
-    H --> I[선택한 프롬프트와 temperature 적용]
-    I --> J[Gemini 3.6 Flash]
-    J --> K[안전 안내 문구 표시]
-    K --> L[gTTS 한국어 음성 출력]
+flowchart LR
+    User[사용자 브라우저]
 
-    A --> M[브라우저 마이크 녹음]
-    M --> N[Google Speech Recognition 한국어 STT]
-    N --> O[인식된 질문 표시]
-    O --> P{이미지 분석 완료 여부}
-    P -->|완료| Q[탐지 결과와 음성 질문을 Gemini에 전달]
-    P -->|미완료| R[이미지 분석 먼저 안내]
-    Q --> S[추가 안내 문구와 TTS 출력]
+    subgraph App[Streamlit 애플리케이션]
+        UI[captcha_streamlit.py<br/>UI 및 요청 제어]
+        YOLO[Ultralytics YOLOv8<br/>객체 탐지]
+        LLM[llm_handler.py<br/>안전 안내 생성]
+        Audio[audio_handler.py<br/>STT 및 TTS]
+    end
+
+    subgraph Local[로컬 자원]
+        Samples[samples/<br/>예제 이미지]
+        Weights[weights/<br/>Nano / Medium 가중치]
+        Prompts[prompts/<br/>안내 프롬프트]
+        Secrets[.env 또는 Streamlit Secrets<br/>API 키]
+    end
+
+    subgraph External[외부 서비스]
+        Drive[Google Drive<br/>모델 가중치]
+        Gemini[Google Gemini API<br/>gemini-3.6-flash]
+        STT[Google Speech Recognition API]
+        TTS[gTTS 서비스]
+    end
+
+    User -->|이미지 업로드, 모델 선택, 음성 녹음| UI
+    UI <-->|분석 결과, 안전 안내, 음성 재생| User
+    Samples --> UI
+    UI --> YOLO
+    Weights --> YOLO
+    Drive -. 최초 실행 시 다운로드 .-> Weights
+    YOLO -->|탐지 객체 및 신뢰도| UI
+    UI -->|탐지 요약, 온도, 음성 질문| LLM
+    Prompts --> LLM
+    Secrets --> LLM
+    LLM <-->|안내 생성 요청 및 응답| Gemini
+    LLM -->|안전 안내 문구| UI
+    UI -->|녹음 데이터 및 안내 문구| Audio
+    Audio <-->|음성 인식 요청 및 결과| STT
+    Audio <-->|음성 합성 요청 및 MP3| TTS
+    Audio -->|STT 텍스트 및 TTS 오디오| UI
 ```
 
 - 학습 및 분석: `박성진_딥러닝프로젝트.ipynb`에서 데이터 탐색과 모델 학습을 수행합니다.
