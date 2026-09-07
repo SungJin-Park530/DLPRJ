@@ -79,7 +79,7 @@ Medium 모델은 정확도 지표가 더 높고, Nano 모델은 파일 크기와
 | 모델 파일 관리 | gdown, Google Drive |
 | 실험/학습 환경 | Jupyter Notebook |
 
-## 시스템 동작 흐름
+## 시스템 아키텍처
 
 ```mermaid
 flowchart TD
