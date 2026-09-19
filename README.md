@@ -30,7 +30,7 @@ Streamlit 배포 정책상 12시간 동안 트래픽이 발생하지 않으면 �
 
 ### 시연 영상
 
-[![주행 환경 이미지 분석 시연 영상](docs/images/dl-thumbnail.png)](https://youtu.be/jH32ye8Zr_Q)
+[![](docs/images/dl-thumbnail.png)](https://youtu.be/jH32ye8Zr_Q)
 
 ### 서비스 화면
 
