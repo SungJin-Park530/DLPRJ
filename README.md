@@ -30,18 +30,14 @@ Streamlit 배포 정책상 12시간 동안 트래픽이 발생하지 않으면 �
 
 ### 시연 영상
 
-<!-- YouTube 링크 또는 영상 썸네일을 준비한 뒤 아래 주석을 해제하세요. -->
-
-<!--
-[![주행 환경 이미지 분석 시연 영상](docs/images/demo-video-thumbnail.png)](https://www.youtube.com/watch?v=VIDEO_ID)
--->
+[![주행 환경 이미지 분석 시연 영상](docs/images/dl-thumbnail.png)](https://youtu.be/jH32ye8Zr_Q)
 
 시연 영상 링크: `[추가 필요]`
 
 ### 서비스 화면
 
 | 표지판 객체 탐지 | 학습 결과 성능 비교 |
-| --- | --- |
+| :---: | :---: |
 | ![표지판 객체 탐지](docs/images/image1.png) | ![학습 결과 성능 비교](docs/images/image2.png) |
 
 ## 주요 기능
