@@ -32,8 +32,6 @@ Streamlit 배포 정책상 12시간 동안 트래픽이 발생하지 않으면 �
 
 [![주행 환경 이미지 분석 시연 영상](docs/images/dl-thumbnail.png)](https://youtu.be/jH32ye8Zr_Q)
 
-시연 영상 링크: `[추가 필요]`
-
 ### 서비스 화면
 
 | 표지판 객체 탐지 | 학습 결과 성능 비교 |
